@@ -1,0 +1,10 @@
+DEPLOY complete for 2026-08-19-vitrina
+Port: 3066
+Subdomain: https://vitrina.proyectos.cristiancode.dev
+Caddy: ✅ reverse_proxy localhost:3066 + SPA try_files
+manage-apis.sh: ✅ vitrina aligned
+Excel: ✅ row 84
+Landing: ✅ proyectos-cristiancode-dev
+Portfolio: ✅ locales + theme + assets + capture config
+Links verified: href/link2/link3/project×3/assets all HTTP 200
+Timestamp: 2026-08-19T05:15:00Z

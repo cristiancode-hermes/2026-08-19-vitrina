@@ -1,0 +1,8 @@
+QA testing complete for 2026-08-19
+Project: vitrina
+Build: ✅ API tsc + Angular ng build (baseHref=/)
+Tests: 20/20 passing (API Jest)
+Browser smoke: 16/16 PASS (auth, dynamic routes, charts, contrast, list↔detail)
+New tests: existing coverage adequate + endpoint/browser smoke
+Issues: 0 critical
+Published: ✅ Caddy (vitrina.proyectos.cristiancode.dev :3066), ✅ Portfolio (es.ts+en.ts+pt.ts), ✅ Landing, ✅ Excel row 84, ✅ GitHub cristiancode-hermes/2026-08-19-vitrina
