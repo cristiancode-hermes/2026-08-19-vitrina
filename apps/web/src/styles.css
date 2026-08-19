@@ -78,7 +78,8 @@ h2 { font-size: clamp(1.35rem, 2.2vw, 1.85rem); }
 h3 { font-size: 1.15rem; }
 p { margin: 0 0 var(--space-3); color: var(--color-muted); }
 a { color: var(--color-primary); text-decoration: none; }
-a:hover { color: var(--color-primary-hover); text-decoration: underline; }
+/* Exclude .btn: a:hover was forcing text = primary-hover on filled CTAs (same as bg → unreadable). */
+a:hover:not(.btn) { color: var(--color-primary-hover); text-decoration: underline; }
 img { max-width: 100%; display: block; }
 button, input, select, textarea { font: inherit; color: inherit; }
 code, .mono { font-family: var(--font-mono); }
@@ -213,7 +214,7 @@ code, .mono { font-family: var(--font-mono); }
   .nav-actions .hide-sm { display: none; }
 }
 
-/* Buttons */
+/* Buttons — text color locked on hover/focus/active (WCAG AA; rule 2026-08-19 contraste-hover) */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -226,35 +227,60 @@ code, .mono { font-family: var(--font-mono); }
   font-size: 0.9rem;
   cursor: pointer;
   text-decoration: none !important;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, filter 0.15s;
   background: var(--color-surface-2);
   color: var(--color-ink);
   line-height: 1.2;
 }
-.btn:hover { filter: brightness(0.97); }
+.btn:hover:not(:disabled) { filter: brightness(0.97); }
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
 .btn:disabled { opacity: 0.55; cursor: not-allowed; filter: none; }
 .btn-primary {
   background: var(--color-primary);
   color: var(--color-on-primary);
 }
-.btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+/* Keep on-primary text when bg shifts to primary-hover (also beats any residual a:hover). */
+.btn-primary:hover:not(:disabled),
+.btn-primary:focus-visible,
+.btn-primary:active {
+  background: var(--color-primary-hover);
+  color: var(--color-on-primary);
+}
 .btn-secondary {
   background: transparent;
   border-color: var(--color-border);
   color: var(--color-ink);
 }
-.btn-secondary:hover:not(:disabled) { background: var(--color-surface-2); }
+.btn-secondary:hover:not(:disabled),
+.btn-secondary:focus-visible,
+.btn-secondary:active {
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+}
 .btn-danger {
   background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
   color: var(--color-danger);
   border-color: color-mix(in srgb, var(--color-danger) 30%, var(--color-border));
+}
+.btn-danger:hover:not(:disabled),
+.btn-danger:focus-visible,
+.btn-danger:active {
+  color: var(--color-danger);
 }
 .btn-ghost {
   background: transparent;
   color: var(--color-muted);
   padding: 0.4rem 0.6rem;
 }
-.btn-ghost:hover { color: var(--color-ink); background: var(--color-surface-2); }
+.btn-ghost:hover:not(:disabled),
+.btn-ghost:focus-visible,
+.btn-ghost:active {
+  color: var(--color-ink);
+  background: var(--color-surface-2);
+}
 .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.82rem; }
 .btn-lg { padding: 0.75rem 1.4rem; font-size: 1rem; }
 .btn-block { width: 100%; }
@@ -421,6 +447,10 @@ code, .mono { font-family: var(--font-mono); }
   transition: border-color 0.15s, background 0.15s;
 }
 .slot-btn:hover:not(:disabled) { border-color: var(--color-primary); }
+.slot-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
 .slot-btn.selected {
   border-color: var(--color-primary);
   background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
@@ -428,7 +458,15 @@ code, .mono { font-family: var(--font-mono); }
 .slot-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .slot-btn .time { font-weight: 600; color: var(--color-ink); display: block; }
 .slot-btn .seats { font-size: 0.75rem; color: var(--color-muted); }
-.slot-btn.low .seats { color: var(--color-warning); }
+/* Keep slot labels readable in hover/selected/active — never inherit link hover color. */
+.slot-btn:hover:not(:disabled) .time,
+.slot-btn.selected .time,
+.slot-btn:active .time { color: var(--color-ink); }
+.slot-btn:hover:not(:disabled) .seats,
+.slot-btn.selected .seats { color: var(--color-muted); }
+.slot-btn.low .seats,
+.slot-btn.low:hover:not(:disabled) .seats,
+.slot-btn.low.selected .seats { color: var(--color-warning); }
 .slot-btn.full .seats { color: var(--color-danger); }
 
 /* Auth split — panel lateral de marca */
@@ -831,7 +869,19 @@ table.data a { font-weight: 500; }
 .mono { font-family: var(--font-mono); }
 .surface-2 { background: var(--color-surface-2); }
 .btn-block { width: 100%; }
-.btn-danger-text { background: transparent; color: var(--color-danger); border: 0; text-decoration: underline; cursor: pointer; }
+.btn-danger-text {
+  background: transparent;
+  color: var(--color-danger);
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.btn-danger-text:hover:not(:disabled),
+.btn-danger-text:focus-visible,
+.btn-danger-text:active {
+  color: var(--color-danger);
+  filter: brightness(0.92);
+}
 .card-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 .expo-card { text-decoration: none; color: inherit; overflow: hidden; display: flex; flex-direction: column; }
 .expo-cover { min-height: 120px; }
