@@ -124,6 +124,25 @@ export class TicketsService implements OnModuleInit, OnModuleDestroy {
         : await qb.getOne();
       if (!slot) throw new NotFoundException('Franja no encontrada');
 
+      // Un usuario no puede tener un segundo hold ni otra entrada confirmada
+      // para la misma exposición + día + franja (slot).
+      const duplicate = await this.tickets.findOne({
+        where: [
+          { userId, slotId: slot.id, status: 'pending' },
+          { userId, slotId: slot.id, status: 'confirmed' },
+        ],
+        order: { createdAt: 'DESC' },
+      });
+      if (duplicate) {
+        const kind =
+          duplicate.status === 'pending'
+            ? 'ya tienes una reserva temporal activa'
+            : 'ya tienes una entrada confirmada';
+        throw new ConflictException(
+          `No puedes volver a reservar esta franja: ${kind} (entrada #${duplicate.id}).`,
+        );
+      }
+
       const free = slot.capacity - slot.reservedCount;
       if (free < qty) {
         throw new ConflictException('No hay cupo suficiente en esta franja');

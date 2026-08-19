@@ -121,6 +121,59 @@ describe('double-sale conflict math', () => {
   });
 });
 
+describe('same-user double booking guard', () => {
+  type Status = 'pending' | 'confirmed' | 'used' | 'cancelled' | 'expired';
+  function blocksSecondHold(
+    existing: { userId: number; slotId: number; status: Status }[],
+    userId: number,
+    slotId: number,
+  ): boolean {
+    return existing.some(
+      (t) =>
+        t.userId === userId &&
+        t.slotId === slotId &&
+        (t.status === 'pending' || t.status === 'confirmed'),
+    );
+  }
+
+  it('blocks second hold when user already has pending on same slot', () => {
+    expect(
+      blocksSecondHold([{ userId: 1, slotId: 9, status: 'pending' }], 1, 9),
+    ).toBe(true);
+  });
+
+  it('blocks second hold when user already has confirmed on same slot', () => {
+    expect(
+      blocksSecondHold([{ userId: 1, slotId: 9, status: 'confirmed' }], 1, 9),
+    ).toBe(true);
+  });
+
+  it('allows hold after cancelled or expired', () => {
+    expect(
+      blocksSecondHold(
+        [
+          { userId: 1, slotId: 9, status: 'cancelled' },
+          { userId: 1, slotId: 9, status: 'expired' },
+        ],
+        1,
+        9,
+      ),
+    ).toBe(false);
+  });
+
+  it('allows other users on same slot', () => {
+    expect(
+      blocksSecondHold([{ userId: 2, slotId: 9, status: 'confirmed' }], 1, 9),
+    ).toBe(false);
+  });
+
+  it('allows same user on a different slot', () => {
+    expect(
+      blocksSecondHold([{ userId: 1, slotId: 8, status: 'confirmed' }], 1, 9),
+    ).toBe(false);
+  });
+});
+
 describe('cancel window', () => {
   it('blocks when less than 24h', () => {
     expect(10 < 24).toBe(true);

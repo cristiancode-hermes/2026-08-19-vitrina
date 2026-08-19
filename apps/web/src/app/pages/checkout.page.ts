@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit, inject, signal, computed } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiService } from '../core/api.service';
@@ -105,6 +106,7 @@ export class CheckoutPageComponent extends FormatBase implements OnInit, OnDestr
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly sanitizer = inject(DomSanitizer);
 
   protected readonly addons = ADDON_OPTIONS;
   protected readonly loading = signal(true);
@@ -259,8 +261,9 @@ export class CheckoutPageComponent extends FormatBase implements OnInit, OnDestr
     });
   }
 
-  protected safeQr(): string {
-    return this.ticket()?.qrSvg || '';
+  protected safeQr(): SafeHtml {
+    // Angular strips <svg> from raw [innerHTML] — must bypass for QR receipt.
+    return this.sanitizer.bypassSecurityTrustHtml(this.ticket()?.qrSvg || '');
   }
 
   private startTimer(expiresAt: string | null): void {
